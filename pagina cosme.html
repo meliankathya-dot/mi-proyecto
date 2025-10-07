@@ -1,0 +1,297 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmetología Elegante: Reseñas, Tutoriales y Tips</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos generales: Colores relajantes (tonos suaves como lavanda, mint, beige y blanco) */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f9f7f5; /* Beige suave */
+            color: #4a4a4a;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Playfair Display', serif;
+            color: #6b5b95; /* Lavanda oscuro para elegancia */
+        }
+
+        header {
+            background-color: #e0e7ff; /* Lavanda claro */
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+
+        nav {
+            margin-top: 10px;
+        }
+
+        nav a {
+            color: #6b5b95;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #a8d5ba; /* Mint verde para hover */
+        }
+
+        section {
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2em;
+            margin-bottom: 30px;
+        }
+
+        /* Estilo para acordeones interactivos */
+        .accordion {
+            background-color: #fff;
+            border: 1px solid #e0e7ff;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            background-color: #e0e7ff;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.2em;
+        }
+
+        .accordion-header.active::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            display: none;
+            padding: 15px;
+            background-color: #f9f7f5;
+        }
+
+        .accordion-content.show {
+            display: block;
+        }
+
+        /* Grid para reseñas y tutoriales */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .card img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        /* Formulario interactivo para tips personalizados */
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        input, select, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #e0e7ff;
+            border-radius: 4px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        button {
+            background-color: #a8d5ba;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #6b5b95;
+        }
+
+        footer {
+            background-color: #e0e7ff;
+            text-align: center;
+            padding: 10px;
+            margin-top: 40px;
+        }
+
+        /* Animaciones suaves */
+        * {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Cosmetología Elegante</h1>
+        <p>Reseñas, Tutoriales y Tips para el Cuidado Personal</p>
+        <nav>
+            <a href="#reseñas">Reseñas</a>
+            <a href="#tutoriales">Tutoriales</a>
+            <a href="#tips">Tips</a>
+        </nav>
+    </header>
+
+    <section id="reseñas">
+        <h2 class="section-title">Reseñas de Productos</h2>
+        <div class="grid">
+            <div class="card">
+                <img src="https://via.placeholder.com/300x200?text=Crema+Hidratante" alt="Crema Hidratante">
+                <h3>Crema Hidratante Natural</h3>
+                <p>Una crema suave y efectiva para piel seca. Calificación: 4.8/5</p>
+            </div>
+            <div class="card">
+                <img src="https://via.placeholder.com/300x200?text=Máscara+de+Pestañas" alt="Máscara de Pestañas">
+                <h3>Máscara de Pestañas Voluminizadora</h3>
+                <p>Da volumen sin grumos. Ideal para uso diario. Calificación: 4.5/5</p>
+            </div>
+            <div class="card">
+                <img src="https://via.placeholder.com/300x200?text=Serum+Anti-Edad" alt="Serum Anti-Edad">
+                <h3>Serum Anti-Edad</h3>
+                <p>Reduce arrugas visiblemente en semanas. Calificación: 4.7/5</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="tutoriales">
+        <h2 class="section-title">Tutoriales Paso a Paso</h2>
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">Maquillaje Natural para el Día</div>
+            <div class="accordion-content">
+                <p>1. Limpia tu rostro.<br>2. Aplica base ligera.<br>3. Usa rubor suave.<br>4. Finaliza con máscara.</p>
+                <img src="https://via.placeholder.com/600x300?text=Tutorial+Maquillaje" alt="Tutorial Maquillaje">
+            </div>
+        </div>
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">Cuidado de la Piel Nocturno</div>
+            <div class="accordion-content">
+                <p>1. Desmaquíllate.<br>2. Usa tónico.<br>3. Aplica serum.<br>4. Hidratación final.</p>
+                <img src="https://via.placeholder.com/600x300?text=Cuidado+Nocturno" alt="Cuidado Nocturno">
+            </div>
+        </div>
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">Peinado Elegante Rápido</div>
+            <div class="accordion-content">
+                <p>1. Lava y seca.<br>2. Usa spray texturizador.<br>3. Recoge en moño bajo.<br>4. Fija con laca.</p>
+                <img src="https://via.placeholder.com/600x300?text=Peinado+Elegante" alt="Peinado Elegante">
+            </div>
+        </div>
+    </section>
+
+    <section id="tips">
+        <h2 class="section-title">Tips para el Cuidado Personal</h2>
+        <p>Selecciona tu tipo de piel para obtener tips personalizados:</p>
+        <form id="tip-form" action="tips.html" method="GET">
+            <input type="text" name="name" placeholder="Tu nombre" required>
+            <select name="skinType" required>
+                <option value="" disabled selected>Selecciona tu tipo de piel</option>
+                <option value="dry">Piel Seca</option>
+                <option value="oily">Piel Grasa</option>
+                <option value="combination">Piel Mixta</option>
+                <option value="sensitive">Piel Sensible</option>
+            </select>
+            <textarea name="concern" placeholder="Describe tu preocupación (opcional)"></textarea>
+            <button type="submit">Enviar y Obtener Tip Personalizado</button>
+        </form>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 Cosmetología Elegante. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        // Funcionalidad interactiva para acordeones
+        function toggleAccordion(header) {
+            header.classList.toggle('active');
+            const content = header.nextElementSibling;
+            content.classList.toggle('show');
+        }
+    </script>
+
+</body>
+</html>
